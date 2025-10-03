@@ -217,7 +217,6 @@ def generate_grid_from_gridspec(
     return data
 
 
-# -------- Optional CLI shim (mirrors your Bash usage) --------
 if __name__ == "__main__":
     import argparse
 
@@ -236,7 +235,7 @@ if __name__ == "__main__":
     parser.add_argument("--target-lon", type=float, default=170.0)
     parser.add_argument("--workdir", type=Path, default=Path("."))
     parser.add_argument("--prefix", type=str, default=None)
-    parser.add_argument("--geohash-precision", type=int, default=7)
+    parser.add_argument("--geohash-precision", type=int, default=12)
     parser.add_argument("--no-save", action="store_true", help="Do not write NetCDF")
 
     args = parser.parse_args()
