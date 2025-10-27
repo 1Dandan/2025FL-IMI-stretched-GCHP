@@ -1,8 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-read -rp "An example successful IMI run tag: " SuccessIMIRunTag
-read -rp "StartDate of the inversion: " StartDate
+read -rp "An example successful IMI run tag (only 3-digit padded number): " SuccessIMIRunTag
 
 # -------------------------
 # User-configurable section
@@ -13,9 +12,9 @@ outdir="${Dir}/${imiDir}/configs_per_target"
 
 # Where to save results
 failed_list="${Dir}/${imiDir}/failed_runs.txt"
-touch "$failed_list"
+: > "$failed_list"
 
-SuccessInvRun="${Dir}/output-gchp-stretch-soil/Test_Stretch_1day_${SuccessIMIRunTag}/inversion"
+SuccessInvRun="${Dir}/output-gchp-stretch-soil/Test_Stretch_1day_T${SuccessIMIRunTag}/inversion"
 THRESHOLD=$(find "${SuccessInvRun}/data_converted" -type f | wc -l)
 
 
