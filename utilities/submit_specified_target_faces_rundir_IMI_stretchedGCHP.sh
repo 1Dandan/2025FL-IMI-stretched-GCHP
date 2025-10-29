@@ -9,7 +9,6 @@ imiDir="imi-stretch-gchp-cp2"
 outdir="${Dir}/${imiDir}/configs_per_target"
 gchp_exec_dir="${Dir}/output-gchp-stretch-soil/Test_Stretch_1month/GEOSChem_build"
 face_list="${Dir}/${imiDir}/submit_faces.txt"
-template="${Dir}/${imiDir}/config-soil-1month.yml"              # template to copy from
 
 # Slurm knobs
 SBATCH_PARTITIONS="sapphire,huce_cascade,seas_compute,shared,unrestricted"
@@ -69,7 +68,6 @@ while IFS= read -r tag; do
     [[ -z "$tag" || "$tag" =~ ^# ]] && continue
 
     yml="configs_faces_for_permian/config-soil_${tag}.yml"
-    cp $template $yml
     logf="imi_output_${tag}.log"
 
     if [[ ! -f "$yml" ]]; then
