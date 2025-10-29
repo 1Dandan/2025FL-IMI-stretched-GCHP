@@ -8,7 +8,8 @@ Dir="/n/holylfs06/LABS/jacob_lab2/Lab/dzhang8/imi-gchp-test"
 imiDir="imi-stretch-gchp-cp2"
 outdir="${Dir}/${imiDir}/configs_per_target"
 gchp_exec_dir="${Dir}/output-gchp-stretch-soil/Test_Stretch_1month/GEOSChem_build"
-failed_list="${Dir}/${imiDir}/failed_runs.txt"
+face_list="${Dir}/${imiDir}/submit_faces.txt"
+template="${Dir}/${imiDir}/config-soil-1month.yml"              # template to copy from
 
 # Slurm knobs
 SBATCH_PARTITIONS="sapphire,huce_cascade,seas_compute,shared,unrestricted"
@@ -35,7 +36,7 @@ tweak_yaml_for_redo() {
     -e 's/^DoHemcoPriorEmis:.*/DoHemcoPriorEmis: true/' \
     -e 's/^DoSpinup:.*/DoSpinup: true/' \
     -e 's/^DoJacobian:.*/DoJacobian: true/' \
-    -e 's/^ReDoJacobian:.*/ReDoJacobian: true/' \
+    -e 's/^ReDoJacobian:.*/ReDoJacobian: false/' \
     -e 's/^DoInversion:.*/DoInversion: true/' \
     -e 's/^DoPosterior:.*/DoPosterior: false/' \
     -e 's/^DoPreview:.*/DoPreview: true/' \
@@ -59,7 +60,7 @@ submit_job() {
 # -------------------------
 
 
-[[ -f "$failed_list" ]] || { echo "No failed list found: $failed_list"; exit 1; }
+[[ -f "$face_list" ]] || { echo "No face list found: $face_list"; exit 1; }
 
 cd ${Dir}/${imiDir}
 
@@ -67,7 +68,8 @@ while IFS= read -r tag; do
     # Skip blanks or comments
     [[ -z "$tag" || "$tag" =~ ^# ]] && continue
 
-    yml="configs_per_target/config-soil_${tag}.yml"
+    yml="configs_faces_for_permian/config-soil_${tag}.yml"
+    cp $template $yml
     logf="imi_output_${tag}.log"
 
     if [[ ! -f "$yml" ]]; then
@@ -77,7 +79,7 @@ while IFS= read -r tag; do
 
     tweak_yaml_for_redo "$yml"
 
-    echo "Resubmitting ${tag}"
+    echo "Submitting ${tag}"
     submit_job "$tag" "$yml"
 
-done < "$failed_list"
+done < "$face_list"
