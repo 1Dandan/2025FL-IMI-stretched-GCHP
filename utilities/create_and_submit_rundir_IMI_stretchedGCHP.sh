@@ -3,10 +3,14 @@ set -euo pipefail
 
 Dir="/n/holylfs06/LABS/jacob_lab2/Lab/dzhang8/imi-gchp-test"
 imiDir="imi-stretch-gchp-cp2"
-template="${Dir}/${imiDir}/config-soil.yml"              # template to copy from
+templatefname="config-soil-1month.yml"
+template="${Dir}/${imiDir}/${templatefname}"              # template to copy from
 target_coords_path="${Dir}/supportData/target_coords.csv"
-outdir="${Dir}/${imiDir}/configs_per_target"        # output folder for generated configs
+outdirsubname="configs_faces_for_permian"
+outdir="${Dir}/${imiDir}/${outdirsubname}"        # output folder for generated configs
 gchp_exec_dir="${Dir}/output-gchp-stretch-soil/Test_Stretch_1month/GEOSChem_build"
+
+runname_base="Test_Stretch_1month"
 
 cd "${Dir}/${imiDir}"
 
@@ -41,22 +45,22 @@ awk -F, '
     printf -v tag "%0${pad}d" "$idx"
 
     # Output filename (you can change naming if you prefer lat/lon in the name)
-    outyml="configs_per_target/config-soil_T${tag}.yml"
+    outyml="${outdirsubname}/config-soil_T${tag}.yml"
 
     # Copy template
     cp "$template" "$outyml"
 
     # RunName
-    sed -i "s/^RunName:.*/RunName: \"Test_Stretch_1day_T${tag}\"/" "$outyml"
+    sed -i "s/^RunName:.*/RunName: \"${runname_base}_T${tag}\"/" "$outyml"
     # TARGET_LAT / TARGET_LON
     sed -i "s/^TARGET_LAT:.*/TARGET_LAT: ${lat}/" "$outyml"
     sed -i "s/^TARGET_LON:.*/TARGET_LON: ${lon}/" "$outyml"
 
     # echo "Created ${outyml}  (lon=${lon}, lat=${lat}, tag=T${tag})"
 
-    mkdir -p "${Dir}/output-gchp-stretch-soil/Test_Stretch_1day_T${tag}"
-    ln -nsf "${gchp_exec_dir}" "${Dir}/output-gchp-stretch-soil/Test_Stretch_1day_T${tag}/GEOSChem_build"
+    mkdir -p "${Dir}/output-gchp-stretch-soil/${runname_base}_T${tag}"
+    ln -nsf "${gchp_exec_dir}" "${Dir}/output-gchp-stretch-soil/${runname_base}_T${tag}/GEOSChem_build"
     # submit IMI
-    sbatch -p serial_requeue,unrestricted,shared \
-    -t 0-12:00 --mem 16G -c 1 -o imi_output_T${tag}.log run_imi.sh "$outyml"
+    #sbatch -p serial_requeue,unrestricted,shared \
+    #-t 0-12:00 --mem 16G -c 1 -o imi_output_T${tag}.log run_imi.sh "$outyml"
 done
