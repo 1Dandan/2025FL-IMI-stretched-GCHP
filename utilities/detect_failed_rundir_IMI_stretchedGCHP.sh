@@ -8,13 +8,15 @@ read -rp "An example successful IMI run tag (only 3-digit padded number): " Succ
 # -------------------------
 Dir="/n/holylfs06/LABS/jacob_lab2/Lab/dzhang8/imi-gchp-test"
 imiDir="imi-stretch-gchp-cp2"
-outdir="${Dir}/${imiDir}/configs_per_target"
+outdirsubname="configs_faces_for_permian"
+outdir="${Dir}/${imiDir}/${outdirsubname}" 
+runname_base="Test_Stretch_1month"
 
 # Where to save results
 failed_list="${Dir}/${imiDir}/failed_runs.txt"
 : > "$failed_list"
 
-SuccessInvRun="${Dir}/output-gchp-stretch-soil/Test_Stretch_1day_T${SuccessIMIRunTag}/inversion"
+SuccessInvRun="${Dir}/output-gchp-stretch-soil/${runname_base}_T${SuccessIMIRunTag}/inversion"
 THRESHOLD=$(find "${SuccessInvRun}/data_converted" -type f | wc -l)
 
 
@@ -29,19 +31,34 @@ ONLY_TAGS_REGEX="${ONLY_TAGS_REGEX:-}"
 # -------------------------
 # Start
 # -------------------------
-shopt -s nullglob
-configs=( "${outdir}"/config-soil_T*.yml )
-shopt -u nullglob
+tag_file="${1:-}"
+
+# -------------------------
+# Build config list
+# -------------------------
+configs=()
+if [[ -n "${Dir}/${imiDir}/$tag_file" && -f "${Dir}/${imiDir}/$tag_file" ]]; then
+  while read -r raw; do
+    tag="$(echo "$raw" | xargs)"               # trim
+    [[ -z "$tag" ]] && continue
+    cfg="${outdir}/config-soil_${tag}.yml"
+    [[ -f "$cfg" ]] && configs+=("$cfg")
+  done < "${Dir}/${imiDir}/$tag_file"
+else
+  shopt -s nullglob
+  configs=( "${outdir}"/config-soil_T*.yml )
+  shopt -u nullglob
+fi
 
 if (( ${#configs[@]} == 0 )); then
-  log "No configs found in ${outdir} (pattern config-soil_T*.yml). Nothing to do."
+  echo "No configs found in ${outdir} (pattern config-soil_T*.yml). Nothing to do."
   exit 0
 fi
 
 for yml in "${configs[@]}"; do
   base="$(basename "$yml")"
   if [[ ! "$base" =~ _T([0-9]+)\.yml$ ]]; then
-    log "Skipping non-matching file: $base"
+    echo "Skipping non-matching file: $base"
     continue
   fi
   tag="T${BASH_REMATCH[1]}"
@@ -51,7 +68,7 @@ for yml in "${configs[@]}"; do
     continue
   fi
 
-  run_root="${Dir}/output-gchp-stretch-soil/Test_Stretch_1day_${tag}"
+  run_root="${Dir}/output-gchp-stretch-soil/${runname_base}_${tag}"
   invdir="${run_root}/inversion"
 
   # Condition: EITHER inversion does not exist OR item count < THRESHOLD

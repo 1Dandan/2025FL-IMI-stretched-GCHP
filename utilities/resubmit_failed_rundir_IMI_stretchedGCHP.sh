@@ -6,7 +6,9 @@ set -euo pipefail
 # -------------------------
 Dir="/n/holylfs06/LABS/jacob_lab2/Lab/dzhang8/imi-gchp-test"
 imiDir="imi-stretch-gchp-cp2"
-outdir="${Dir}/${imiDir}/configs_per_target"
+outdirsubname="configs_faces_for_permian"
+outdir="${Dir}/${imiDir}/${outdirsubname}" 
+runname_base="Test_Stretch_1month"
 gchp_exec_dir="${Dir}/output-gchp-stretch-soil/Test_Stretch_1month/GEOSChem_build"
 failed_list="${Dir}/${imiDir}/failed_runs.txt"
 
@@ -27,18 +29,18 @@ tweak_yaml_for_redo() {
 
   sed -i -E \
     -e 's/^RunSetup:.*/RunSetup: true/' \
-    -e 's/^SetupTemplateRundir:.*/SetupTemplateRundir: true/' \
-    -e 's/^SetupSpinupRun:.*/SetupSpinupRun: true/' \
-    -e 's/^SetupJacobianRuns:.*/SetupJacobianRuns: true/' \
+    -e 's/^SetupTemplateRundir:.*/SetupTemplateRundir: false/' \
+    -e 's/^SetupSpinupRun:.*/SetupSpinupRun: false/' \
+    -e 's/^SetupJacobianRuns:.*/SetupJacobianRuns: false/' \
     -e 's/^SetupInversion:.*/SetupInversion: true/' \
     -e 's/^SetupPosteriorRun:.*/SetupPosteriorRun: false/' \
-    -e 's/^DoHemcoPriorEmis:.*/DoHemcoPriorEmis: true/' \
-    -e 's/^DoSpinup:.*/DoSpinup: true/' \
+    -e 's/^DoHemcoPriorEmis:.*/DoHemcoPriorEmis: false/' \
+    -e 's/^DoSpinup:.*/DoSpinup: false/' \
     -e 's/^DoJacobian:.*/DoJacobian: true/' \
     -e 's/^ReDoJacobian:.*/ReDoJacobian: true/' \
     -e 's/^DoInversion:.*/DoInversion: true/' \
     -e 's/^DoPosterior:.*/DoPosterior: false/' \
-    -e 's/^DoPreview:.*/DoPreview: true/' \
+    -e 's/^DoPreview:.*/DoPreview: false/' \
     "$yml"
 }
 
@@ -67,7 +69,7 @@ while IFS= read -r tag; do
     # Skip blanks or comments
     [[ -z "$tag" || "$tag" =~ ^# ]] && continue
 
-    yml="configs_per_target/config-soil_${tag}.yml"
+    yml="${outdirsubname}/config-soil_${tag}.yml"
     logf="imi_output_${tag}.log"
 
     if [[ ! -f "$yml" ]]; then
